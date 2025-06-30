@@ -1,0 +1,329 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CLIENT
+  MASTER
+  ADMIN
+}
+
+enum ServiceCategory {
+  EXTERIOR_FINISH    // Внешняя отделка
+  AUTO_SERVICE       // Автосервис
+  ELECTRICAL        // Электрика
+  PLUMBING          // Сантехника
+  INTERIOR_FINISH   // Внутренняя отделка
+  CONSTRUCTION      // Строительство
+  LANDSCAPING       // Ландшафтный дизайн
+  CLEANING          // Уборка
+  WELDING          // Сварочные работы
+  WINDOWS_DOORS    // Окна и двери
+  FORGING          // Кованые изделия
+  OTHER             // Другое
+  DRILLING         // Бурение
+  AGRICULTURE      // Сельское хозяйство
+  HEATING          // Отопление
+  CEILINGS         // Потолки
+  FLOOR_SCREED     // Стяжка пола
+  SPECIAL_EQUIPMENT // Спецтехника
+  CARGO_TRANSPORT  // Грузоперевозки
+  BODY_REPAIR      // Кузовные работы
+  AUTO_DETAILING   // Авто детейлинг
+  HANDYMAN         // Разнорабочие
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String    
+  name          String
+  role          UserRole
+  avatar        String?
+  banner        String?   // URL баннера профиля
+  description   String?   @db.Text
+  city          String
+  phone         String?
+  socialLinks   Json?     // Хранение ссылок на соцсети в формате JSON
+  rating        Float?    @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  isSetupComplete Boolean @default(false)
+  firstName     String?
+  lastName      String?
+
+  // Связи для подписчиков (много-ко-многим)
+  followers     Follow[]  @relation("Following")
+  following     Follow[]  @relation("Followers")
+
+  // Связи для постов и избранного
+  posts         Post[]
+  comments      Comment[]
+  likedPosts    PostLike[]
+  favorites     Favorite[]
+  favoritedByUsers UserFavorite[] @relation("UserWhoFavorited")
+  favoritingUsers UserFavorite[] @relation("UserWhoFavorites")
+
+  // Связи для чатов и сообщений
+  chatParticipants ChatParticipant[]
+  sentMessages Message[] @relation("UserSentMessages")
+
+  // Специфичные поля для мастеров
+  services      Service[]
+  serviceArea   Json?
+  readyToTravel Boolean?
+  workGallery   GalleryImage[]
+  reviews       Review[]
+
+  // NextAuth.js relations
+  accounts      Account[]
+  sessions      Session[]
+
+  platformFeedback PlatformFeedback[]
+  globalChatMessages GlobalChatMessage[]
+
+  @@index([role])
+}
+
+// Модель для хранения изображений в галерее работ
+model GalleryImage {
+  id          String    @id @default(cuid())
+  url         String    // URL изображения
+  title       String?   // Название работы
+  description String?   @db.Text  // Описание работы
+  masterId    String    // ID мастера
+  master      User      @relation(fields: [masterId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  
+  @@index([masterId])
+}
+
+// Модель услуг мастера
+model Service {
+  id              String          @id @default(cuid())
+  title           String          // Название услуги
+  category        ServiceCategory // Категория услуги
+  specializationId String         // ID специализации
+  description     String?         @db.Text  // Описание услуги (необязательное)
+  masterId        String          // ID мастера
+  master          User            @relation(fields: [masterId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([masterId])
+  @@index([category])
+  @@index([specializationId])
+}
+
+// Остальные модели
+model Post {
+  id        String    @id @default(cuid())
+  content   String    @db.Text
+  images    String[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+  likes     PostLike[]
+  comments  Comment[]
+
+  @@index([authorId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  authorId  String
+  postId    String
+  author    User     @relation(fields: [authorId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@index([authorId])
+  @@index([postId])
+}
+
+// Промежуточная модель для связи много-ко-многим между Post и User (лайки)
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String   // ID поста
+  userId    String   // ID пользователя
+  createdAt DateTime @default(now())  // Когда поставлен лайк
+  
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])  // Пользователь может лайкнуть пост только один раз
+  @@index([postId])
+  @@index([userId])
+}
+
+model Follow {
+  id          String    @id @default(cuid())
+  followerId  String    // ID подписчика
+  followingId String    // ID на кого подписан
+  follower    User      @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User      @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model Review {
+  id          String    @id @default(cuid())
+  content     String
+  rating      Int       @default(5)
+  masterId    String
+  master      User      @relation(fields: [masterId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@index([masterId])
+}
+
+model Favorite {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemType    String    // "master", "product", "shop"
+  itemId      String
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, itemType, itemId])
+  @@index([userId])
+}
+
+model UserFavorite {
+  id              String    @id @default(cuid())
+  userId          String    // ID пользователя, который добавил в избранное
+  favoriteUserId  String    // ID пользователя, которого добавили в избранное
+  createdAt       DateTime  @default(now())
+  
+  user            User      @relation("UserWhoFavorites", fields: [userId], references: [id], onDelete: Cascade)
+  favoriteUser    User      @relation("UserWhoFavorited", fields: [favoriteUserId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, favoriteUserId])
+  @@index([userId])
+  @@index([favoriteUserId])
+}
+
+// NextAuth.js Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Модель для чата между пользователями
+model Chat {
+  id          String   @id @default(cuid())
+  participants ChatParticipant[]
+  messages    Message[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Промежуточная модель для участников чата (многие-ко-многим)
+model ChatParticipant {
+  id      String @id @default(cuid())
+  chat    Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  joinedAt DateTime @default(now())
+
+  @@unique([chatId, userId])
+  @@index([userId])
+  @@index([chatId])
+}
+
+// Модель для сообщений в чате
+model Message {
+  id        String   @id @default(cuid())
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId    String
+  sender    User     @relation("UserSentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId  String
+  content   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([chatId])
+  @@index([senderId])
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String?
+  image     String?
+  images    Json?    // массив картинок для слайдера
+  links     Json?    // массив ссылок для слайдера
+  link      String?
+  active    Boolean  @default(true)
+  position  Int      // 1-5 десктоп, 6-7 мобильные
+  mobileOnly Boolean @default(false) // true — только для мобилки
+  bgColor   String?  // HEX или tailwind класс
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Модель для отзывов о платформе
+model PlatformFeedback {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  userId    String?  // ID пользователя, если он был авторизован
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Модель для сообщений в общем чате
+model GlobalChatMessage {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([senderId])
+} 
