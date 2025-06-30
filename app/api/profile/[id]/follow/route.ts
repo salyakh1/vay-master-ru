@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import { Post } from '@/types/user'
+import { UserRole } from '@prisma/client'
 
 interface ExtendedPost extends Post {
   likes: any[];
@@ -46,8 +47,8 @@ export async function POST(
 
     // Бизнес-логика подписки
     const canFollow =
-      (currentUser.role === 'CLIENT' && (targetUser.role === 'MASTER' || targetUser.role === 'SHOP')) ||
-      ((currentUser.role === 'MASTER' || currentUser.role === 'SHOP') && (targetUser.role === 'MASTER' || targetUser.role === 'SHOP'))
+      (currentUser.role === UserRole.CLIENT && targetUser.role === UserRole.MASTER) ||
+      (currentUser.role === UserRole.MASTER && targetUser.role === UserRole.MASTER)
     if (!canFollow) {
       return new NextResponse('Подписка невозможна по правилам платформы', { status: 403 })
     }

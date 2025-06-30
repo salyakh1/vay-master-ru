@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import type { UserRole } from '@/types/user';
+import { UserRole } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       },
       where: role ? {
         author: {
-          role: { equals: role }
+          role: role
         }
       } : undefined,
       skip: (page - 1) * POSTS_PER_PAGE,
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const totalCount = await prisma.post.count({
       where: role ? {
         author: {
-          role: { equals: role }
+          role: role
         }
       } : undefined
     });
