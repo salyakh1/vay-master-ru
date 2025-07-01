@@ -110,11 +110,6 @@ export async function PUT(req: Request) {
           serviceArea: data.serviceArea,
           readyToTravel: data.readyToTravel,
         }),
-        ...(session.user.role === 'SHOP' && {
-          address: data.address,
-          workingHours: data.workingHours,
-          hasDelivery: data.hasDelivery,
-        }),
       },
     });
 
@@ -132,22 +127,6 @@ export async function PUT(req: Request) {
           category: service.category,
           specializationId: service.specializationId,
           title: service.title || '',
-        })),
-      });
-    }
-
-    // Если пользователь магазин, обновляем категории товаров
-    if (session.user.role === 'SHOP' && data.shopCategories) {
-      // Удаляем старые категории
-      await prisma.shopProductCategory.deleteMany({
-        where: { shopId: userId },
-      });
-
-      // Добавляем новые категории
-      await prisma.shopProductCategory.createMany({
-        data: data.shopCategories.map((category: string) => ({
-          shopId: userId,
-          name: category,
         })),
       });
     }
