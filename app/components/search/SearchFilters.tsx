@@ -114,7 +114,7 @@ export default function SearchFilters({ params, onFilterChange, categories: avai
                         : 'border-gray-300 text-gray-700 hover:border-blue-500'
                     }`}
                   >
-                    {categoryData.name}
+                    {categoryData.title}
                   </button>
                 );
               })}
@@ -138,7 +138,7 @@ export default function SearchFilters({ params, onFilterChange, categories: avai
                         : 'border-gray-300 text-gray-700 hover:border-blue-500'
                     }`}
                   >
-                    {service.name}
+                    {service.title}
                   </button>
                 ))}
               </div>
