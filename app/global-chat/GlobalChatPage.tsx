@@ -100,8 +100,8 @@ export default function GlobalChatPage({
         name: session.user.name ?? 'Вы',
         avatar: session.user.avatar ?? null,
         role: session.user.role as UserRole,
-        firstName: session.user.firstName,
-        lastName: session.user.lastName,
+        firstName: (session.user as any).firstName ?? null,
+        lastName: (session.user as any).lastName ?? null,
       },
     };
 
