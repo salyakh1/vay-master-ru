@@ -15,7 +15,6 @@ async function deleteAllUsers() {
       prisma.galleryImage.deleteMany(),
       prisma.service.deleteMany(),
       prisma.review.deleteMany(),
-      prisma.product.deleteMany(),
       prisma.account.deleteMany(),
       prisma.session.deleteMany(),
       prisma.verificationToken.deleteMany(),
