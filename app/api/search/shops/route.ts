@@ -18,9 +18,9 @@ export async function GET(request: Request) {
       where.name = { contains: name, mode: 'insensitive' };
     }
     if (category) {
-      where.shopCategories = {
-        some: { name: category }
-      };
+      // where.shopCategories = {
+      //   some: { name: category }
+      // };
     }
     if (productType) {
       where.products = {
@@ -41,16 +41,7 @@ export async function GET(request: Request) {
         name: true,
         city: true,
         avatar: true,
-        rating: true,
-        shopCategories: {
-          select: { name: true }
-        },
-        address: true,
-        workingHours: true,
-        hasDelivery: true,
-        products: {
-          select: { name: true }
-        }
+        rating: true
       },
       orderBy: [
         { rating: 'desc' },
@@ -64,12 +55,7 @@ export async function GET(request: Request) {
       name: shop.name,
       city: shop.city,
       logo: shop.avatar,
-      rating: shop.rating,
-      categories: shop.shopCategories.map(c => c.name),
-      address: shop.address,
-      workingHours: shop.workingHours,
-      hasDelivery: shop.hasDelivery,
-      inStock: shop.products.map(p => p.name)
+      rating: shop.rating
     }));
 
     return NextResponse.json(result);
