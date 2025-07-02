@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { serviceCategories } from '../app/types/serviceCategories';
 
 const prisma = new PrismaClient();
 
@@ -8,7 +7,6 @@ async function main() {
   await prisma.message.deleteMany();
   await prisma.chat.deleteMany();
   await prisma.service.deleteMany();
-  await prisma.serviceCategory.deleteMany();
   await prisma.user.deleteMany();
 
   // Create admin user
@@ -18,16 +16,9 @@ async function main() {
       name: 'Admin',
       password: '$2a$12$kxZ7dOk3a9Zq5ZrKIEqwCOYz6TtxMQJqhN.B3UHw0K9mZBDPRK.rC', // "password123"
       role: 'ADMIN',
-      setupComplete: true
+      city: 'Москва',
+      isSetupComplete: true
     }
-  });
-
-  // Create service categories
-  await prisma.serviceCategory.createMany({
-    data: serviceCategories.map(category => ({
-      name: category.name,
-      icon: category.icon
-    }))
   });
 }
 
