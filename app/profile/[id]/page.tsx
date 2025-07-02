@@ -55,6 +55,8 @@ export default async function ProfilePage({ params }: { params: { id: string } }
   // Собираем расширенные поля
   const extendedUser = {
     ...user,
+    firstName: user.firstName ?? undefined,
+    lastName: user.lastName ?? undefined,
     posts: user.posts || [],
     followersCount,
     followingCount,
