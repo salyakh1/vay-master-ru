@@ -309,4 +309,7 @@ export const categoryTitles: Record<ServiceCategory, string> = {
   BODY_REPAIR: 'Кузовные работы',
   AUTO_DETAILING: 'Авто детейлинг',
   HANDYMAN: 'Разнорабочие',
-}; 
+};
+
+// Заглушка для categories, чтобы не было ошибки импорта
+export const categories: string[] = []; 
