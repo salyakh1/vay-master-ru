@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
-import type { Post, User, UserRole } from '@/types/user';
+import type { Post, UserRole } from '@/types/user';
 import { authOptions } from '@/lib/authOptions';
 import InfiniteFeed from './InfiniteFeed';
 import FeedFilter from './FeedFilter';
