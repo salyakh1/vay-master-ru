@@ -20,10 +20,6 @@ export const credentialsProvider = CredentialsProvider({
     const user = await prisma.user.findUnique({
       where: {
         email: credentials.email
-      },
-      include: {
-        shopCategories: true,
-        products: true
       }
     });
 
@@ -53,12 +49,8 @@ export const credentialsProvider = CredentialsProvider({
       name: user.name,
       role: user.role,
       city: user.city,
-      phone: user.phone,
-      isSetupComplete: user.isSetupComplete,
-      hasDelivery: user.hasDelivery,
-      workingHours: user.workingHours,
-      shopCategories: user.shopCategories,
-      products: user.products
+      phone: user.phone ?? undefined,
+      isSetupComplete: user.isSetupComplete
     };
   }
 }); 
