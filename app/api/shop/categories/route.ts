@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -21,16 +20,8 @@ export async function GET() {
       );
     }
 
-    const categories = await prisma.shopProductCategory.findMany({
-      where: {
-        shopId: session.user.id
-      },
-      include: {
-        products: true
-      }
-    });
-
-    return NextResponse.json({ categories });
+    // Категории товаров для магазинов не реализованы
+    return NextResponse.json({ categories: [] });
   } catch (error) {
     console.error('Shop categories error:', error);
     return NextResponse.json(
