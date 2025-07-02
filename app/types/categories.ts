@@ -311,5 +311,9 @@ export const categoryTitles: Record<ServiceCategory, string> = {
   HANDYMAN: 'Разнорабочие',
 };
 
-// Заглушка для categories, чтобы не было ошибки импорта
-export const categories: string[] = []; 
+// Экспортируем реальные категории для фильтров поиска
+export const categories = Object.entries(categoryTitles).map(([id, title]) => ({
+  id,
+  title,
+  services: specializations[id as ServiceCategory] || []
+})); 
