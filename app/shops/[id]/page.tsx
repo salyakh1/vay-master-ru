@@ -77,6 +77,7 @@ export default function ShopProfilePage({ params }: { params: { id: string } }) 
             role: session.user.role,
             city: session.user.city
           } : null}
+          isOwnProfile={session?.user?.id === params.id}
           onFollow={async () => {
             try {
               const response = await fetch(`/api/profile/${params.id}/follow`, {
