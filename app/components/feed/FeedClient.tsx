@@ -29,7 +29,7 @@ export default function FeedClient({ favoriteUsers, favoritePosts, allPosts, cur
             <div className="text-center text-gray-400 py-12">Нет публикаций от ваших подписок</div>
           ) : (
             favoritePosts.map((post) => (
-              <PostCard key={post.id} post={post} currentUser={currentUser} />
+              <PostCard key={post.id} post={post} currentUser={currentUser} onLike={async (postId: string) => {}} />
             ))
           )}
         </div>
@@ -91,7 +91,7 @@ export default function FeedClient({ favoriteUsers, favoritePosts, allPosts, cur
         </button>
         <div className="flex flex-col gap-6">
           {orderedPosts.map((post) => (
-            <PostCard key={post.id} post={post} currentUser={currentUser} />
+            <PostCard key={post.id} post={post} currentUser={currentUser} onLike={async (postId: string) => {}} />
           ))}
         </div>
       </div>
