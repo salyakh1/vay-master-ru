@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import Image from 'next/image';
 
+// Отключаем статическую генерацию для этой страницы
+export const dynamic = 'force-dynamic';
+
 export default async function AdvertisingPage() {
   // Получаем все баннеры, включая мобильные
   const banners = await prisma.banner.findMany({

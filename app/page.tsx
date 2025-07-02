@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 import Loading from './loading';
 import { prisma } from '@/lib/prisma';
@@ -6,8 +6,11 @@ import { ServiceCategory, User } from '@prisma/client';
 import { specializations } from './types/categories';
 import { MainNav } from './components/navigation/MainNav';
 
+// Отключаем статическую генерацию для этой страницы
+export const dynamic = 'force-dynamic';
+
 // Динамический импорт для оптимизации загрузки
-const LandingPage = dynamic(() => import('@/app/components/landing/LandingPage'), {
+const LandingPage = dynamicImport(() => import('@/app/components/landing/LandingPage'), {
   loading: () => <Loading />,
   ssr: false, // Отключаем SSR для компонента, который теперь является клиентским
 });
