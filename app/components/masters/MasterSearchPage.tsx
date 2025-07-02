@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { ServiceCategory } from '@prisma/client';
 
 async function getInitialData() {
-  const masters = await prisma.user.findMany({
+  const mastersRaw = await prisma.user.findMany({
     where: {
       role: 'MASTER'
     },
@@ -19,15 +19,38 @@ async function getInitialData() {
       phone: true,
       description: true,
       avatar: true,
+      banner: true,
       rating: true,
-      services: true,
+      services: {
+        select: {
+          id: true,
+          title: true,
+          category: true,
+        }
+      },
       socialLinks: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: true,
     },
     orderBy: [
       { rating: 'desc' },
       { name: 'asc' },
     ],
   });
+
+  // Приводим к типу MasterWithDetails (заполняем недостающие поля-заглушки)
+  const masters = mastersRaw.map((m: any) => ({
+    ...m,
+    banner: m.banner ?? null,
+    createdAt: m.createdAt ?? new Date(),
+    updatedAt: m.updatedAt ?? new Date(),
+    _count: {
+      followers: m._count?.followers ?? 0,
+      reviews: m._count?.reviews ?? 0,
+    },
+    services: m.services || [],
+  }));
 
   return {
     masters,
